@@ -1,13 +1,13 @@
 /**
- * Bead 1: CSV Parser Tests
+ * Task 1: CSV Parser Tests
  *
- * All tests must pass before moving to Bead 2.
- * Run with: npm run test:bead1
+ * All tests must pass before moving to Task 2.
+ * Run with: npm run test:task1
  */
 
 import { parseCSV } from '../src/csv-parser';
 
-describe('Bead 1: CSV Parser', () => {
+describe('Task 1: CSV Parser', () => {
   it('parses simple CSV with headers', () => {
     const csv = 'name,email,role\nAlice,alice@example.com,admin';
     const result = parseCSV(csv);

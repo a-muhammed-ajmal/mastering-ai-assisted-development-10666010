@@ -3,14 +3,15 @@
  *
  * Parse a CSV string into an array of user objects.
  *
+ * This task is delegated to a Claude subagent that implements
+ * the function and verifies it against tests/task-1-parser.test.ts.
+ *
  * Requirements:
  * - Parse header row (name, email, role)
  * - Handle quoted fields
  * - Trim whitespace
  * - Skip empty rows
  * - Handle various line endings (CRLF, LF)
- *
- * Run tests: npm run test:task1
  */
 
 import { User } from './types';

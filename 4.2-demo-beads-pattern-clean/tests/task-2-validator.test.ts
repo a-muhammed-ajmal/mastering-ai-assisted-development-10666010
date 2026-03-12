@@ -1,13 +1,13 @@
 /**
- * Bead 2: Validator Tests
+ * Task 2: Validator Tests
  *
- * All tests must pass before moving to Bead 3.
- * Run with: npm run test:bead2
+ * All tests must pass before T3 (Deduplicator) can start.
+ * Run with: npm run test:task2
  */
 
 import { validateUsers } from '../src/validator';
 
-describe('Bead 2: Validator', () => {
+describe('Task 2: Validator', () => {
   it('validates correct users', () => {
     const users = [
       { name: 'Alice', email: 'alice@example.com', role: 'admin' },

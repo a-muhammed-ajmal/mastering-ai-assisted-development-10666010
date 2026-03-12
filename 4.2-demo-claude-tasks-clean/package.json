@@ -2,7 +2,7 @@
   "name": "demo-claude-tasks",
   "private": true,
   "version": "1.0.0",
-  "description": "Course 4.2: Claude Tasks - Native Task Orchestration with Hydration Pattern",
+  "description": "Course 2, Chapter 4.2: Claude Tasks - Native modular agent chains using subagents",
   "scripts": {
     "test": "jest",
     "test:task1": "jest --testPathPattern=task-1",

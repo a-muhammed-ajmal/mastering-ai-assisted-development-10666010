@@ -1,10 +1,10 @@
-# Beads Pattern: User Import Pipeline
+# Claude Tasks: User Import Pipeline
 
-## Video 3.2: Beads Pattern — Modular Task Chains
+## Video 4.2: Claude Tasks — Native Modular Agent Chains
 
-Each "bead" is a sequential task with its own acceptance criteria and commit point. If a bead fails, you can roll back to the previous commit without losing earlier work.
+Each "task" is delegated to a Claude subagent with its own fresh context. The subagent implements, tests, and reports back. The parent agent commits after each task passes.
 
-## Bead 1: CSV Parser
+## Task 1: CSV Parser
 
 **Goal**: Parse a CSV string into an array of user objects.
 
@@ -32,17 +32,17 @@ Bob,bob@example.com,editor
 - Skip empty rows
 - Handle various line endings (CRLF, LF)
 
-**Test Command**: `npm run test:bead1`
+**Test Command**: `npm run test:task1`
 
-**Commit Message**: `git commit -m "bead-1: CSV parser with quoted field support"`
+**Commit Message**: `git commit -m "task-1: CSV parser with quoted field support"`
 
 ---
 
-## Bead 2: Validator
+## Task 2: Validator
 
 **Goal**: Validate each parsed user object.
 
-**Input**: Array of user objects from Bead 1
+**Input**: Array of user objects from Task 1
 
 **Output**:
 ```typescript
@@ -67,17 +67,17 @@ Bob,bob@example.com,editor
 - Separate valid users from invalid ones
 - Include the original user data in the invalid result
 
-**Test Command**: `npm run test:bead2`
+**Test Command**: `npm run test:task2`
 
-**Commit Message**: `git commit -m "bead-2: user validator with email and role checks"`
+**Commit Message**: `git commit -m "task-2: user validator with email and role checks"`
 
 ---
 
-## Bead 3: Deduplicator
+## Task 3: Deduplicator
 
 **Goal**: Remove duplicate users from the valid list.
 
-**Input**: Array of valid user objects from Bead 2
+**Input**: Array of valid user objects from Task 2
 
 **Output**:
 ```typescript
@@ -117,15 +117,15 @@ Output: {
 - Preserve original case of email in output
 - Maintain order: unique users in order they first appear (except duplicates removed)
 
-**Test Command**: `npm run test:bead3`
+**Test Command**: `npm run test:task3`
 
-**Commit Message**: `git commit -m "bead-3: deduplicator with case-insensitive email matching"`
+**Commit Message**: `git commit -m "task-3: deduplicator with case-insensitive email matching"`
 
 ---
 
 ## Running the Full Pipeline
 
-After all three beads pass their tests, you can wire them together:
+After all three tasks pass their tests, you can wire them together:
 
 ```typescript
 import { parseCSV } from './csv-parser';
@@ -143,24 +143,24 @@ console.log('Imported:', unique.length, 'unique users');
 
 ---
 
-## Notes for the AI Agent
+## Notes for Claude Code
 
-Work through the beads in order. Do NOT move to the next bead until the current bead passes all tests.
+Use the Task tool to delegate each step to a subagent. Work through the tasks in order. Do NOT start the next task until the current one passes all tests.
 
-After each bead passes:
+After each task passes:
 ```bash
-npm run test:beadX  # Verify all tests pass
-git commit -m "bead-X: [description]"
+npm run test:taskX  # Verify all tests pass
+git commit -m "task-X: [description]"
 ```
 
-If you get stuck on a bead, review:
+If a subagent gets stuck, review:
 1. The input and output type definitions in `src/types.ts`
-2. The test cases in `tests/bead-X-*.test.ts` (they show expected behavior)
+2. The test cases in `tests/task-X-*.test.ts` (they show expected behavior)
 3. The requirements above (they're detailed and specific)
 
 You're done when `git log` shows three commits:
 ```
-bead-3: deduplicator with case-insensitive email matching
-bead-2: user validator with email and role checks
-bead-1: CSV parser with quoted field support
+task-3: deduplicator with case-insensitive email matching
+task-2: user validator with email and role checks
+task-1: CSV parser with quoted field support
 ```

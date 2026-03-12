@@ -2,7 +2,8 @@
  * Shared type definitions for the Claude Tasks demo.
  *
  * All three tasks use these types to ensure consistent data flow.
- * These types serve as the "contract" between tasks in the dependency chain.
+ * These types form the contract between subagents — each task
+ * consumes and produces data matching these interfaces.
  */
 
 export interface User {

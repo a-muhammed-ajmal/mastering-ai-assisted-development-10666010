@@ -1,14 +1,14 @@
 /**
- * Bead 3: Deduplicator Tests
+ * Task 3: Deduplicator Tests
  *
- * All tests must pass to complete the Beads Pattern demo.
- * Run with: npm run test:bead3
+ * All tests must pass to complete the Claude Tasks demo.
+ * Run with: npm run test:task3
  */
 
 import { deduplicateUsers } from '../src/deduplicator';
 import { User } from '../src/types';
 
-describe('Bead 3: Deduplicator', () => {
+describe('Task 3: Deduplicator', () => {
   it('returns all users when no duplicates', () => {
     const users: User[] = [
       { name: 'Alice', email: 'alice@example.com', role: 'admin' },

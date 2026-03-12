@@ -3,12 +3,13 @@
  *
  * Remove duplicate users from the valid list.
  *
+ * This task is delegated to a Claude subagent that implements
+ * the function and verifies it against tests/task-3-dedup.test.ts.
+ *
  * Deduplication Rules:
  * - Duplicate = same email (case-insensitive)
  * - Keep the LAST occurrence (most recent in the list)
  * - Return: { unique: User[], duplicates: User[] }
- *
- * Run tests: npm run test:task3
  */
 
 import { User, DeduplicationResult } from './types';

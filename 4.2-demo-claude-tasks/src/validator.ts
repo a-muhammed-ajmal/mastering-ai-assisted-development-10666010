@@ -3,14 +3,15 @@
  *
  * Validate each parsed user object.
  *
+ * This task is delegated to a Claude subagent that implements
+ * the function and verifies it against tests/task-2-validator.test.ts.
+ *
  * Validation Rules:
  * - Email: must match ^[^\s@]+@[^\s@]+\.[^\s@]+$
  * - Role: must be 'admin', 'editor', or 'viewer'
  * - Name: must be non-empty after trimming
  *
  * Returns: { valid: User[], invalid: { user, errors }[] }
- *
- * Run tests: npm run test:task2
  */
 
 import { User, ValidationResult } from './types';
