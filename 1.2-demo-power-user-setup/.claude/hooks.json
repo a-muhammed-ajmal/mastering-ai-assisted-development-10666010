@@ -23,6 +23,18 @@
   ],
   "PostFileWrite": [
     {
+      "matcher": "*.js",
+      "command": "npx eslint --fix ${file}"
+    },
+    {
+      "matcher": "*.ts",
+      "command": "npx eslint --fix ${file}"
+    },
+    {
+      "matcher": "*.tsx",
+      "command": "npx eslint --fix ${file}"
+    },
+    {
       "matcher": "src/**/*.test.ts",
       "command": "npx jest --findRelatedTests ${file} --passWithNoTests"
     },
