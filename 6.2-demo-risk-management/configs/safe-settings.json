@@ -1,0 +1,63 @@
+{
+  "description": "Example restrictive settings for safe agent operation",
+  "permissions": {
+    "allow": [
+      "Read",
+      "Glob(src/**)",
+      "Glob(tests/**)",
+      "Grep(src/**)",
+      "Grep(tests/**)",
+      "Write(src/**)",
+      "Write(tests/**)",
+      "Write(docs/**)",
+      "Bash(npm test)",
+      "Bash(npm run lint)",
+      "Bash(npm run build)",
+      "Bash(npm run format)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(git status)",
+      "Bash(git log --oneline -10)",
+      "Bash(git diff HEAD)",
+      "Bash(git add .)",
+      "Bash(git commit -m *)"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(git push)",
+      "Bash(git push --force)",
+      "Bash(git reset --hard)",
+      "Bash(git rebase -i)",
+      "Bash(git clean -fd)",
+      "Bash(curl *)",
+      "Bash(wget *)",
+      "Bash(find * -delete)",
+      "Bash(DROP *)",
+      "Bash(DELETE FROM *)",
+      "Write(.env*)",
+      "Write(*.key)",
+      "Write(*.pem)",
+      "Write(*.secret)",
+      "Write(config/secrets*)",
+      "Write(credentials*)"
+    ]
+  },
+  "limits": {
+    "maxIterations": 25,
+    "maxTokensPerSession": 100000,
+    "requireCheckpointEvery": 5,
+    "readOnlyBranches": ["main", "master", "production"]
+  },
+  "safety": {
+    "requireCompilation": true,
+    "requireTestPass": true,
+    "requireLintPass": false,
+    "blockNewDependencies": true,
+    "blockExternalNetworkCalls": true,
+    "restrictGitOperations": true
+  },
+  "documentation": {
+    "requireCommitMessages": true,
+    "requirePRDescriptions": true,
+    "enforceConventionalCommits": true
+  }
+}

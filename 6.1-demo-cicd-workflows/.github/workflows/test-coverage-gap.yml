@@ -1,61 +1,98 @@
-# Video 6.2: CI/CD Integration
-#
-# This GitHub Action identifies test coverage gaps and optionally
-# uses AI to generate missing tests. Demonstrates the "test coverage
-# gap filler" pattern from the video.
-#
-# Guardrails:
-# - Generated tests are committed to a branch, not auto-merged
-# - Human review required before merging AI-generated tests
-# - Cost controls via max iterations
-# - Secrets stored securely
-
-name: Test Coverage Gap Filler
+name: Test Coverage Gap Analysis
 
 on:
-  push:
-    branches: [main]
-  workflow_dispatch:
-
-permissions:
-  contents: write
-  pull-requests: write
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
-  check-coverage:
+  coverage-analysis:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+
+    permissions:
+      pull-requests: write
+      contents: read
 
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
-          node-version: '20'
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
           cache: 'npm'
 
-      - run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
       - name: Run tests with coverage
-        run: npm test -- --coverage --coverageReporters=json-summary
+        id: coverage
+        run: npm run test:coverage
         continue-on-error: true
 
-      - name: Check coverage threshold
-        id: coverage
+      - name: Get changed files
+        id: changed-files
         run: |
-          echo "In production, this step would:"
-          echo "  1. Parse coverage/coverage-summary.json"
-          echo "  2. Identify files below 80% line coverage"
-          echo "  3. List uncovered functions and branches"
-          echo "  4. Optionally trigger AI test generation for gaps"
+          git fetch origin ${{ github.base_ref }}
+          CHANGED=$(git diff origin/${{ github.base_ref }}...HEAD --name-only -- src/)
+          # Escape for JSON
+          CHANGED="${CHANGED//'%'/'%25'}"
+          CHANGED="${CHANGED//$'\n'/'%0A'}"
+          CHANGED="${CHANGED//$'\r'/'%0D'}"
+          echo "files=$CHANGED" >> $GITHUB_OUTPUT
 
-      - name: Generate missing tests (placeholder)
-        if: steps.coverage.outputs.gaps == 'true'
+      - name: Read coverage report
+        id: read-coverage
         run: |
-          echo "In production, this step would:"
-          echo "  1. Send uncovered code to Claude API"
-          echo "  2. Ask AI to generate tests for specific uncovered paths"
-          echo "  3. Create a new branch with the generated tests"
-          echo "  4. Open a PR for human review"
-          echo ""
-          echo "Key principle: AI GENERATES tests, humans REVIEW and merge"
+          if [ -f coverage/coverage-summary.json ]; then
+            COVERAGE=$(cat coverage/coverage-summary.json | head -c 3000)
+            COVERAGE="${COVERAGE//'%'/'%25'}"
+            COVERAGE="${COVERAGE//$'\n'/'%0A'}"
+            COVERAGE="${COVERAGE//$'\r'/'%0D'}"
+            echo "report=$COVERAGE" >> $GITHUB_OUTPUT
+          else
+            echo "report=No coverage report generated" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Send to Claude API for gap analysis
+        id: claude-analysis
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          CHANGED_FILES="${{ steps.changed-files.outputs.files }}"
+          COVERAGE_DATA="${{ steps.read-coverage.outputs.report }}"
+
+          RESPONSE=$(curl -s https://api.anthropic.com/v1/messages \
+            -H "x-api-key: $ANTHROPIC_API_KEY" \
+            -H "anthropic-version: 2023-06-01" \
+            -H "content-type: application/json" \
+            -d '{
+              "model": "claude-opus-4-6",
+              "max_tokens": 2048,
+              "messages": [
+                {
+                  "role": "user",
+                  "content": "Analyze test coverage gaps based on the following data and suggest missing test cases:\n\nChanged files:\n'"$(echo "$CHANGED_FILES" | head -c 1000)"'\n\nCoverage report:\n'"$(echo "$COVERAGE_DATA" | head -c 2000)"'\n\nProvide specific recommendations for test cases that should be added to improve coverage."
+                }
+              ]
+            }')
+
+          ANALYSIS=$(echo "$RESPONSE" | jq -r '.content[0].text')
+          ANALYSIS="${ANALYSIS//'%'/'%25'}"
+          ANALYSIS="${ANALYSIS//$'\n'/'%0A'}"
+          ANALYSIS="${ANALYSIS//$'\r'/'%0D'}"
+          echo "analysis=$ANALYSIS" >> $GITHUB_OUTPUT
+
+      - name: Post analysis as PR comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const analysis = `${{ steps.claude-analysis.outputs.analysis }}`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 🧪 Test Coverage Gap Analysis\n\n${analysis}`
+            });
