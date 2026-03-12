@@ -2,7 +2,7 @@
   "name": "demo-ralph-loop",
   "private": true,
   "version": "1.0.0",
-  "description": "Course 2, Chapter 3.1: The RALPH Loop - Autonomous iteration until tests pass",
+  "description": "Course 4, Chapter 4.1: The Ralph Loop — Autonomous AI agent loop using snarktank/ralph",
   "scripts": {
     "test": "jest",
     "test:pagination": "jest --testPathPattern=pagination",

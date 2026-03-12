@@ -1,14 +1,9 @@
 /**
- * Video 3.1: The RALPH Loop — Autonomous Iteration
+ * Video 4.1: The Ralph Loop — Autonomous AI Agent Loop (snarktank/ralph)
  *
  * These tests define the acceptance criteria for the pagination utility.
- * The AI agent should implement src/paginate.ts to make ALL tests pass.
- *
- * RALPH Loop prompt:
- *   "Implement the pagination utility described in src/pagination-spec.md.
- *    After each change, run `npm test`.
- *    Keep iterating until ALL tests pass.
- *    Do not stop until you have zero test failures."
+ * Each test maps to a user story in prd.json.
+ * Ralph iterates until all stories (and their tests) pass.
  */
 
 import { paginate } from '../src/paginate';

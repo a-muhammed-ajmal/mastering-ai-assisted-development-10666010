@@ -1,53 +1,51 @@
-# Chapter 3.1: The RALPH Loop — Autonomous Iteration
+# Chapter 4.1: The Ralph Loop — Clean Starting Point
 
-## Starting Point
+## Overview
 
-This is a clean starting point for the RALPH Loop demo. Use this to demonstrate how an AI agent autonomously iterates on code until all tests pass.
+This is a clean starting point for the Ralph Loop demo. Use this to demonstrate how [snarktank/ralph](https://github.com/snarktank/ralph) autonomously iterates through user stories until all tests pass.
 
-## Your Task
+## What's Here
 
-Implement the `paginate` function in `src/paginate.ts` to pass all tests in `tests/pagination.test.ts`.
+### Ralph Infrastructure (ready to go)
+- `scripts/ralph/ralph.sh` — The loop script
+- `prd.json` — 7 user stories, all with `"passes": false`
+- `CLAUDE.md` — Prompt template for each AI instance
 
-### The RALPH Loop Workflow
+### Pagination Project (the task Ralph will build)
+- `src/paginate.ts` — Stub implementation (throws "Not implemented")
+- `src/pagination-spec.md` — Full requirements specification
+- `tests/pagination.test.ts` — 7 acceptance tests (all will fail initially)
 
-1. **Read** the requirements in `src/pagination-spec.md`
-2. **Ask** Claude (or your AI agent) to implement the function
-3. **Loop** — Have the agent run `npm test` after each change
-4. **Help** the agent debug failures
-5. **Keep going** until all tests pass (zero failures)
-
-### Quick Start
+## Quick Start
 
 ```bash
 npm install
-npm test
+npm test          # See 7 test failures — this is expected!
 ```
 
-You should see 7 test failures. This is expected! The agent's job is to fix them all.
+## Run Ralph
 
-### The Implementation
+```bash
+./scripts/ralph/ralph.sh --tool claude
+```
 
-The agent should implement a cursor-based pagination utility with:
-- Generic type safety (`<T extends { id: string }>`)
-- Base64-encoded cursors
-- Support for multi-page navigation
-- Proper handling of edge cases (empty data, invalid cursors)
+Ralph will spawn fresh Claude instances in a loop. Each instance:
+1. Reads `prd.json` to find the next incomplete story
+2. Implements the code for that story
+3. Runs `npm test` to verify
+4. Updates `prd.json` (marks `"passes": true`)
+5. Appends learnings to `progress.txt`
+6. Commits to git and exits
 
-### Success Criteria
+The loop continues until all 7 stories pass.
 
-All 7 tests must pass:
-- ✓ Returns correct data for first page
-- ✓ Returns correct nextCursor for subsequent pages
-- ✓ Returns `hasMore: false` on last page
-- ✓ Handles empty dataset
-- ✓ Is type-safe — generic T matches item type
-- ✓ Works with different page sizes
-- ✓ Cursor decodes correctly for continuation
+## What to Watch For
 
-### Learning Goals
+- **`prd.json`** — Stories flip from `false` to `true` as Ralph progresses
+- **`progress.txt`** — Created automatically, captures learnings from each iteration
+- **`src/paginate.ts`** — Grows from a stub to a full implementation
+- **Git log** — Each iteration produces a clean commit
 
-After completing this, document in `AGENTS.md`:
-- What patterns and conventions you discovered
-- Gotchas you encountered
-- Test coverage status
-- Learnings for future iterations
+## Success Criteria
+
+All 7 tests pass and all stories in `prd.json` show `"passes": true`.
