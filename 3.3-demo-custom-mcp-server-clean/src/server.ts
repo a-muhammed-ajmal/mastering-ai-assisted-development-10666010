@@ -35,7 +35,7 @@ const apiDocumentation: Record<string, { endpoint: string; method: string; descr
   // TODO: Add API endpoints here
 };
 
-// --- TODO: Implement tool handlers ---
+// --- TODO: Implement tool handlers using server.registerTool() ---
 
 // Tool 1: Get Feature Flag Status
 // Tool 2: Check Service Health

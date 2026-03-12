@@ -35,10 +35,12 @@ const serviceHealth: Record<string, { status: string; latencyMs: number; errorRa
 
 // --- Tool 1: Feature Flag Reader ---
 
-server.tool(
+server.registerTool(
   'get-feature-flag',
-  'Get the status of a feature flag by name',
-  { flagName: z.string().describe('The feature flag name (e.g., "new-checkout")') },
+  {
+    description: 'Get the status of a feature flag by name',
+    inputSchema: { flagName: z.string().describe('The feature flag name (e.g., "new-checkout")') },
+  },
   async ({ flagName }) => {
     const flag = featureFlags[flagName];
     if (!flag) {
@@ -52,10 +54,12 @@ server.tool(
 
 // --- Tool 2: Service Health Monitor ---
 
-server.tool(
+server.registerTool(
   'check-service-health',
-  'Check the health status of internal services',
-  { serviceName: z.string().optional().describe('Specific service name, or omit for all services') },
+  {
+    description: 'Check the health status of internal services',
+    inputSchema: { serviceName: z.string().optional().describe('Specific service name, or omit for all services') },
+  },
   async ({ serviceName }) => {
     if (serviceName) {
       const health = serviceHealth[serviceName];
@@ -70,10 +74,12 @@ server.tool(
 
 // --- Tool 3: List All Feature Flags ---
 
-server.tool(
+server.registerTool(
   'list-feature-flags',
-  'List all available feature flags and their statuses',
-  {},
+  {
+    description: 'List all available feature flags and their statuses',
+    inputSchema: {},
+  },
   async () => {
     return { content: [{ type: 'text' as const, text: JSON.stringify(featureFlags, null, 2) }] };
   },
