@@ -1,14 +1,14 @@
 /**
- * Chapter 2.3: Hooks & Automation Demo
+ * Chapter 2.3: Custom Slash Commands & Workflow Automation Demo (Clean)
  *
- * A simple Express server demonstrating a typical project structure
- * where hooks would auto-lint, auto-test, and auto-notify.
+ * A simple Express server — the starting point before adding
+ * custom slash commands. No .claude/ directory yet.
  *
  * This server provides basic CRUD operations for notes.
- * Ask Claude to add endpoints and watch hooks run:
- * - Auto-lint on file write
- * - Auto-test on file write
- * - Desktop notification when done
+ * During the demo, you'll create commands like:
+ * - /verify  — run tests + lint and get a summary
+ * - /review  — structured code review with severity levels
+ * - /scaffold — generate a new feature module with tests
  */
 
 import express from 'express';

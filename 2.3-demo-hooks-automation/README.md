@@ -1,417 +1,108 @@
-# Hooks & Automation — Quality on Autopilot
+# Custom Slash Commands & Workflow Automation
 
-## What Are Hooks?
+## What Are Slash Commands?
 
-**Hooks** are automatic triggers that run before or after Claude performs an action. They're your way of enforcing quality standards without asking Claude to remember them every time.
+**Slash commands** are custom markdown files in `.claude/commands/` that turn repeated prompts into single, reliable actions. If you type the same prompt twice, it should probably become a command.
 
-Think of hooks as:
-- **Pre-flight checks** before dangerous operations
-- **Post-action cleanup** (auto-lint, auto-test)
-- **Notifications** when Claude finishes long tasks
-- **Guardrails** that prevent mistakes
+Think of them as:
+- **Macros** for your AI workflow
+- **Team-shareable** prompt templates
+- **Deterministic** multi-step workflows
+- **One-word shortcuts** for complex tasks
 
-### Hooks vs. Skills
+### Commands vs. Skills vs. Hooks
 
 | Concept | Purpose | Example |
 |---------|---------|---------|
 | **Skills** | What Claude knows about your codebase | "Use semantic HTML in components" |
-| **Hooks** | What Claude automatically does on your behalf | "Auto-lint after writing code" |
-| **CLAUDE.md** | Strategic context about your project | "We're a React SaaS with 50K users" |
+| **Hooks** | Automatic triggers on tool actions | "Auto-lint after writing code" |
+| **Commands** | Explicit workflows you invoke by name | "/verify — run tests + lint + summarize" |
 
-Hooks are the **automation layer** that turns standards into action.
-
----
-
-## Three Types of Hooks
-
-### 1. PreToolUse Hooks
-
-Run **before** Claude executes a tool (Bash, Write, Edit, etc.)
-
-**Use case:** Block dangerous commands
-
-```
-You ask: Claude, run rm -rf /
-Hook intercepts: "This looks like a force delete. Require confirmation."
-Result: Claude must acknowledge the danger before proceeding
-```
-
-### 2. PostToolUse Hooks
-
-Run **after** Claude executes a tool
-
-**Use case:** Auto-lint, auto-test, auto-format
-
-```
-Claude writes: src/Button.tsx
-Hook runs: npx eslint --fix src/Button.tsx && npx jest --findRelatedTests src/Button.tsx
-Result: Code is linted and tests run automatically
-```
-
-### 3. Notification Hooks
-
-Send alerts when events occur
-
-**Use case:** Desktop/Slack notifications for long tasks
-
-```
-Claude finishes: 30-minute refactoring task
-Hook triggers: Send desktop notification "Claude finished your task"
-Result: You get a ping instead of manually checking
-```
+Commands are the **workflow layer** that turns multi-step processes into repeatable actions.
 
 ---
 
-## Four Concrete Examples
+## Three Practical Commands
 
-### Example 1: Auto-Lint on File Save
+### Command 1: /verify
 
-**Trigger:** PostToolUse + Write tool + TypeScript files
+Run tests and lint, then summarize results.
 
-```json
-{
-  "event": "PostToolUse",
-  "matcher": {
-    "tool": "Write",
-    "filePath": "src/**/*.ts"
-  },
-  "command": "npx eslint --fix $FILE_PATH"
-}
-```
+**File:** `.claude/commands/verify.md`
 
-**What happens:**
-1. Claude writes `src/utils/format.ts`
-2. Hook detects the write
-3. Runs `npx eslint --fix src/utils/format.ts` automatically
-4. Code is linted before you even see it
+**What it does:**
+1. Runs `npm test` and captures output
+2. Runs `npm run lint` and captures output
+3. Outputs a structured summary (pass/fail, counts, suggested fixes)
 
-**Benefits:**
-- No more "eslint failed" surprises
-- Consistent formatting across the codebase
-- Linting feedback loop is instant
+**When to use:** Before committing, after a refactor, or as a quick sanity check.
 
 ---
 
-### Example 2: Auto-Run Related Tests
+### Command 2: /review
 
-**Trigger:** PostToolUse + Write tool + src/ files
+Structured code review with severity levels.
 
-```json
-{
-  "event": "PostToolUse",
-  "matcher": {
-    "tool": "Write",
-    "filePath": "src/**/*.ts"
-  },
-  "command": "npx jest --findRelatedTests $FILE_PATH --passWithNoTests"
-}
-```
+**File:** `.claude/commands/review.md`
 
-**What happens:**
-1. Claude writes `src/api/users.ts`
-2. Hook finds all related tests (`users.test.ts`, `api.test.ts`, etc.)
-3. Runs tests automatically
-4. If tests fail, you see the error immediately
-5. Claude can fix the issue before handing off to you
+**What it does:**
+1. Reads all source files
+2. Checks for security issues, performance problems, and code style
+3. Outputs a table with severity (HIGH/MEDIUM/LOW), file paths, and suggestions
 
-**Benefits:**
-- Catch bugs during development, not in production
-- Red tests = immediate feedback loop
-- Claude can self-correct based on test failures
+**When to use:** Before opening a PR, onboarding to a new codebase, or periodic quality checks.
 
 ---
 
-### Example 3: Block Dangerous Commands
+### Command 3: /scaffold
 
-**Trigger:** PreToolUse + Bash tool + dangerous patterns
+Generate a new feature module with route and test files.
 
-```json
-{
-  "event": "PreToolUse",
-  "matcher": {
-    "tool": "Bash",
-    "command": "rm -rf|git push.*--force|DROP TABLE|DELETE FROM"
-  },
-  "command": "echo 'BLOCKED: Dangerous command detected. Require explicit confirmation.' && exit 1"
-}
-```
+**File:** `.claude/commands/scaffold.md`
 
-**What happens:**
-1. You ask: "Delete all temp files with `rm -rf /tmp/*`"
-2. Claude constructs the command
-3. Hook detects the `-rf` pattern
-4. Command is blocked before execution
-5. You must explicitly confirm the dangerous operation
+**What it does:**
+1. Reads existing code patterns from server.ts
+2. Creates a new route file matching the existing structure
+3. Creates a matching test file
+4. Shows how to wire it into the app
 
-**Dangerous patterns to block:**
-- `rm -rf` (force recursive delete)
-- `git push --force` (rewrite history)
-- `DROP TABLE` (delete database)
-- `DELETE FROM WHERE` (unfiltered deletes)
-- `chmod 777` (open permissions to everyone)
-
-**Benefits:**
-- Accidental destructive commands are prevented
-- You maintain control over risky operations
-- Good audit trail of what was prevented
+**When to use:** Starting any new feature — ensures consistent patterns across the codebase.
 
 ---
 
-### Example 4: Notifications on Task Completion
+## Writing Good Commands
 
-**Trigger:** Notification hook on taskComplete event
+### Three Principles
 
-```json
-{
-  "event": "Notification",
-  "matcher": {
-    "event": "taskComplete"
-  },
-  "command": "osascript -e 'display notification \"Claude finished your task\" with title \"Claude Code\"'"
-}
-```
+1. **Explicit steps** — Don't say "review the code." Say "check security, then performance, then style, then output a summary with severity levels."
 
-Or on macOS with sound:
-```json
-{
-  "command": "osascript -e 'display notification \"Claude finished your task\" with title \"Claude Code\" sound name \"Glass\"'"
-}
-```
+2. **Structured output** — Ask for tables, severity levels, pass/fail summaries. Consistent format means you can scan results quickly.
 
-Or send to Slack (requires webhook):
-```json
-{
-  "command": "curl -X POST $SLACK_WEBHOOK -d '{\"text\": \"Claude finished the refactoring task\"}'"
-}
-```
+3. **Clear success criteria** — Tell Claude what "done" looks like. For /verify: "all tests pass and zero lint errors."
 
-**What happens:**
-1. Claude finishes a 20-minute refactoring
-2. Hook detects task completion
-3. Desktop notification appears
-4. No need to manually check status
+### Command File Structure
 
-**Benefits:**
-- Stay informed without constant monitoring
-- Asynchronous workflow (start task, go get coffee)
-- Multiple notification channels (desktop, Slack, email)
+```markdown
+# /command-name $ARGUMENTS
 
----
+Description of what this command does.
 
-## Hook Configuration: .claude/hooks.json
+## Steps
 
-Hooks are defined in `.claude/hooks.json`:
+1. First action
+2. Second action
+3. Output format specification
 
-```json
-{
-  "hooks": [
-    {
-      "event": "PostToolUse",
-      "matcher": {
-        "tool": "Write",
-        "filePath": "src/**/*.ts"
-      },
-      "command": "npx eslint --fix $FILE_PATH"
-    },
-    {
-      "event": "PostToolUse",
-      "matcher": {
-        "tool": "Write",
-        "filePath": "src/**/*.tsx"
-      },
-      "command": "npx prettier --write $FILE_PATH && npx eslint --fix $FILE_PATH"
-    },
-    {
-      "event": "PreToolUse",
-      "matcher": {
-        "tool": "Bash",
-        "command": "rm -rf|git push.*--force"
-      },
-      "command": "echo 'BLOCKED: Dangerous command. Require explicit confirmation.' && exit 1"
-    },
-    {
-      "event": "Notification",
-      "matcher": {
-        "event": "taskComplete"
-      },
-      "command": "osascript -e 'display notification \"Claude finished\" with title \"Claude Code\"'"
-    }
-  ]
-}
-```
+## Success Criteria
 
-### Hook Schema
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `event` | `PreToolUse \| PostToolUse \| Notification` | When the hook triggers |
-| `matcher` | Object | Conditions that must match to trigger the hook |
-| `command` | String | Shell command to execute |
-
-### Matcher Options
-
-**For PostToolUse / PreToolUse:**
-- `tool` — Name of the tool (Bash, Write, Edit, etc.)
-- `filePath` — File path glob pattern (e.g., `src/**/*.ts`)
-- `command` — Regex pattern to match command text
-
-**For Notification:**
-- `event` — Event type (e.g., `taskComplete`, `taskError`)
-
-### Environment Variables
-
-Hooks can access:
-- `$FILE_PATH` — The file being operated on
-- `$COMMAND` — The command being run
-- `$PROJECT_ROOT` — Your project root directory
-- `$HOOK_EVENT` — The hook event type (PostToolUse, PreToolUse)
-
-Example:
-```json
-{
-  "command": "echo 'File written: $FILE_PATH' >> /tmp/claude-log.txt"
-}
-```
-
----
-
-## Real-World Hook System
-
-A complete `.claude/hooks.json` for a React project:
-
-```json
-{
-  "hooks": [
-    {
-      "event": "PostToolUse",
-      "matcher": {
-        "tool": "Write",
-        "filePath": "src/**/*.tsx"
-      },
-      "command": "npx prettier --write $FILE_PATH && npx eslint --fix $FILE_PATH && npx jest --findRelatedTests $FILE_PATH --passWithNoTests"
-    },
-    {
-      "event": "PostToolUse",
-      "matcher": {
-        "tool": "Write",
-        "filePath": "src/**/*.ts"
-      },
-      "command": "npx eslint --fix $FILE_PATH && npx jest --findRelatedTests $FILE_PATH --passWithNoTests"
-    },
-    {
-      "event": "PostToolUse",
-      "matcher": {
-        "tool": "Edit",
-        "filePath": "CLAUDE.md"
-      },
-      "command": "echo 'CLAUDE.md updated on $(date)' >> /tmp/claude-updates.log"
-    },
-    {
-      "event": "PreToolUse",
-      "matcher": {
-        "tool": "Bash",
-        "command": "rm -rf|git push.*--force|DROP|DELETE FROM"
-      },
-      "command": "echo 'BLOCKED: Dangerous command' && exit 1"
-    },
-    {
-      "event": "Notification",
-      "matcher": {
-        "event": "taskComplete"
-      },
-      "command": "osascript -e 'display notification \"Claude finished\" with title \"Claude Code\"'"
-    }
-  ]
-}
-```
-
-**This system ensures:**
-- All React components are formatted with Prettier
-- All TypeScript files are linted with ESLint
-- Related tests run automatically after code changes
-- Dangerous operations are blocked
-- Long tasks notify you when complete
-
----
-
-## Composing Skills + MCP + Hooks
-
-This is where the magic happens:
-
-```
-Feature Request: "Add dark mode support"
-
-1. CLAUDE.md tells Claude:
-   "We're a React SaaS, dark mode should use CSS variables"
-
-2. Skills tell Claude:
-   "Components must be accessible, tested, with TypeScript props"
-
-3. MCP tells Claude:
-   "Check if dark-mode feature flag is enabled before coding"
-
-4. Hooks auto-run when Claude finishes:
-   "Lint the code, run tests, notify me when done"
-
-Result:
-┌─────────────────────────────────────────┐
-│ Dark Mode Feature (Fully Complete)      │
-├─────────────────────────────────────────┤
-│ ✓ Respects feature flags (MCP)          │
-│ ✓ Follows component patterns (Skills)   │
-│ ✓ Well-tested and accessible (Skills)   │
-│ ✓ Code linted automatically (Hooks)     │
-│ ✓ Tests passed (Hooks)                  │
-│ ✓ You were notified (Hooks)             │
-└─────────────────────────────────────────┘
-```
-
----
-
-## Advanced: Custom Hook Commands
-
-Hooks can run any shell command. Examples:
-
-**Run type checking:**
-```json
-{
-  "command": "npx tsc --noEmit"
-}
-```
-
-**Generate documentation:**
-```json
-{
-  "command": "npx typedoc --out docs $FILE_PATH"
-}
-```
-
-**Update metrics:**
-```json
-{
-  "command": "curl -X POST https://metrics.example.com/files-updated -d '{\"file\": \"$FILE_PATH\"}'"
-}
-```
-
-**Slack notification:**
-```json
-{
-  "command": "curl -X POST $SLACK_WEBHOOK -d '{\"text\": \"$FILE_PATH updated\"}'"
-}
-```
-
-**Custom validation script:**
-```json
-{
-  "command": "bash ./scripts/validate-code.sh $FILE_PATH"
-}
+What "done" looks like.
 ```
 
 ---
 
 ## Demo: Running the Example Project
 
-This demo includes a simple Express server (`src/example-project/server.ts`) that demonstrates a typical project structure where hooks would be useful.
+This demo includes a simple Express server (`src/example-project/server.ts`) with three custom slash commands.
 
 ### Setup
 
@@ -420,90 +111,38 @@ This demo includes a simple Express server (`src/example-project/server.ts`) tha
    npm install
    ```
 
-2. **Configure hooks:**
-   - Copy `.claude/hooks.json` (provided in this demo)
-   - Customize matchers for your file patterns
-
-3. **Ask Claude to modify the example project:**
-   ```
-   "Add a new POST /notes endpoint to create notes"
-   ```
-
-4. **Watch hooks run:**
-   - ESLint fixes formatting
-   - Tests run and pass
-   - Desktop notification when done
-
----
-
-## Best Practices
-
-1. **Start with post-hooks** — They're safer than pre-hooks
-   - Post-hooks: Format, lint, test after Claude writes
-   - Pre-hooks: Only for blocking truly dangerous operations
-
-2. **Make hooks idempotent** — They can run multiple times
-   - Good: `eslint --fix` (safe to run twice)
-   - Bad: `git commit` (can't run twice safely)
-
-3. **Fast hooks only** — Keep them under 10 seconds
-   - If a hook takes 2 minutes, it defeats the purpose
-   - Long tasks should be explicit, not automatic
-
-4. **Log hook usage** — Audit what's being automated
-   - Log to `/tmp/claude-hooks.log`
-   - Helps debug hook issues
-
-5. **Test hooks locally first** — Don't blind-enable them
+2. **Open in Claude Code:**
    ```bash
-   # Test a hook command manually
-   npx eslint --fix src/example.ts
+   claude
    ```
 
----
-
-## When to Use Hooks
-
-**Use hooks for:**
-- Auto-formatting and linting
-- Running fast tests
-- Cache busting or rebuilds
-- Logging and metrics
-- Desktop/Slack notifications
-
-**Don't use hooks for:**
-- Slow operations (> 10 seconds)
-- Destructive operations that need human review
-- External API calls that might fail
-- Building/deploying to production
+3. **Try the commands:**
+   - Type `/verify` — runs tests + lint and summarizes results
+   - Type `/review` — structured code review of the project
+   - Type `/scaffold tags` — generates a new tags feature module
 
 ---
 
-## Troubleshooting Hooks
+## Sharing Commands Across Your Team
 
-**Hook not running?**
-- Check `.claude/hooks.json` syntax (JSON must be valid)
-- Verify matcher conditions (filePath glob, command regex)
-- Check that the tool name matches exactly (Bash, Write, Edit)
+Commands are just markdown files in your repo. Commit them and everyone gets the same workflows:
 
-**Hook taking too long?**
-- Add `--passWithNoTests` to jest calls
-- Use `--max-workers=1` to parallelize less
-- Consider splitting into faster hooks
+```
+.claude/
+└── commands/
+    ├── verify.md      # Test + lint pipeline
+    ├── review.md      # Code review checklist
+    └── scaffold.md    # Feature generator
+```
 
-**Hook command failing?**
-- Test the command manually first: `npx eslint --fix src/file.ts`
-- Add error handling: `command -f || echo "Failed but continuing"`
-- Check environment variables are available
+Treat commands like code: review them, version them, evolve them over time.
 
 ---
 
 ## Next Steps
 
-1. **Create `.claude/hooks.json`** in your project
-2. **Start with one post-hook** — ESLint or Prettier
-3. **Add test automation** — Run tests after code writes
-4. **Add notifications** — Know when Claude finishes
-5. **Expand gradually** — Add more hooks as you discover needs
-
-Hooks transform quality standards from "things Claude knows" into "things Claude does automatically."
+1. **Start with /verify** — test + lint is universally useful
+2. **Add /review** — consistent code reviews across the team
+3. **Create project-specific commands** — /scaffold, /release, /deploy-check
+4. **Commit to repo** — share with your team
+5. **Iterate** — refine commands based on real usage

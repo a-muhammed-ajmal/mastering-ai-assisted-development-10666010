@@ -2,7 +2,7 @@
   "name": "demo-hooks-automation",
   "private": true,
   "version": "1.0.0",
-  "description": "Course 2, Chapter 2.3: Hooks & Automation - Quality on autopilot",
+  "description": "Course 2, Chapter 2.3: Custom Slash Commands & Workflow Automation (Clean start)",
   "type": "module",
   "scripts": {
     "dev": "tsx src/example-project/server.ts",
