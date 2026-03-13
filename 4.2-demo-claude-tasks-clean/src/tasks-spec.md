@@ -1,8 +1,8 @@
 # Task Spec: User Import Pipeline
 
-## Video 4.2: Task Specs & the Hydration Pattern
+## Video 4.2: Tasks — Dependency Tracking & Cross-Session Persistence
 
-This is a structured task specification. Claude reads this file, works through unchecked tasks in dependency order, and checks them off as they pass. Commit this file to git so the next session picks up where you left off.
+This is a project specification describing four tasks with dependencies. Claude reads this spec, creates Tasks with dependency metadata, and works through them in order. Tasks persist in `~/.claude/tasks/` and can be shared across sessions via `CLAUDE_CODE_TASK_LIST_ID`.
 
 ## Task 1: CSV Parser
 
@@ -197,20 +197,32 @@ console.log(report.summary);
 
 ## Notes for Claude Code
 
-Use the Task tool to delegate each step to a subagent. Work through the tasks in order. Do NOT start the next task until the current one passes all tests.
+Read this spec and create Tasks for each step. Set dependencies in the task metadata:
+- T2 depends on T1
+- T3 depends on T2
+- T4 has no dependencies (can run alongside T1)
 
-After each task passes:
+Work through tasks in dependency order. After each task passes its tests, mark it complete and commit:
 ```bash
 npm run test:taskX  # Verify all tests pass
-git commit -m "task-X: [description]"
+git add -A && git commit -m "task-X: [description]"
 ```
 
-If a subagent gets stuck, review:
+If stuck, review:
 1. The input and output type definitions in `src/types.ts`
 2. The test cases in `tests/task-X-*.test.ts` (they show expected behavior)
 3. The requirements above (they're detailed and specific)
 
-You're done when `git log` shows four commits:
+### Cross-Session Persistence
+
+Tasks are stored in `~/.claude/tasks/`. To resume across sessions:
+```bash
+CLAUDE_CODE_TASK_LIST_ID=user-import claude
+```
+
+Press `Ctrl+T` to toggle the task list view in your terminal.
+
+You're done when all tasks show as complete and `git log` shows four commits:
 ```
 task-4: report generator with pipeline statistics
 task-3: deduplicator with case-insensitive email matching
