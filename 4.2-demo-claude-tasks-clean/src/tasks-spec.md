@@ -1,8 +1,8 @@
-# Claude Tasks: User Import Pipeline
+# Task Spec: User Import Pipeline
 
-## Video 4.2: Claude Tasks — Native Modular Agent Chains
+## Video 4.2: Task Specs & the Hydration Pattern
 
-Each "task" is delegated to a Claude subagent with its own fresh context. The subagent implements, tests, and reports back. The parent agent commits after each task passes.
+This is a structured task specification. Claude reads this file, works through unchecked tasks in dependency order, and checks them off as they pass. Commit this file to git so the next session picks up where you left off.
 
 ## Task 1: CSV Parser
 
@@ -123,22 +123,74 @@ Output: {
 
 ---
 
+## Task 4: Report Generator
+
+**Goal**: Generate a summary report of the import pipeline results.
+
+**Note**: This task has **no dependencies** — it can be implemented at any time, even in parallel with T1.
+
+**Input**: Pipeline statistics
+```typescript
+{
+  totalParsed: number;
+  validCount: number;
+  invalidCount: number;
+  uniqueCount: number;
+  duplicateCount: number;
+}
+```
+
+**Output**:
+```typescript
+{
+  totalParsed: number;
+  validCount: number;
+  invalidCount: number;
+  uniqueCount: number;
+  duplicateCount: number;
+  summary: string;        // Human-readable multi-line report
+  generatedAt: string;    // ISO 8601 timestamp
+}
+```
+
+**Requirements**:
+- Accept counts for each pipeline stage
+- Generate a human-readable summary string with all counts
+- Include validation rate percentage (valid / totalParsed) when totalParsed > 0
+- Include uniqueness rate percentage (unique / valid) when validCount > 0
+- Include a `generatedAt` ISO timestamp
+- Handle zero counts gracefully (no division by zero)
+
+**Test Command**: `npm run test:task4`
+
+**Commit Message**: `git commit -m "task-4: report generator with pipeline statistics"`
+
+---
+
 ## Running the Full Pipeline
 
-After all three tasks pass their tests, you can wire them together:
+After all four tasks pass their tests, you can wire them together:
 
 ```typescript
 import { parseCSV } from './csv-parser';
 import { validateUsers } from './validator';
 import { deduplicateUsers } from './deduplicator';
+import { generateReport } from './reporter';
 
 const csv = `name,email,role\nAlice,alice@example.com,admin\n...`;
 
 const parsed = parseCSV(csv);
-const { valid } = validateUsers(parsed);
-const { unique } = deduplicateUsers(valid);
+const { valid, invalid } = validateUsers(parsed);
+const { unique, duplicates } = deduplicateUsers(valid);
+const report = generateReport({
+  totalParsed: parsed.length,
+  validCount: valid.length,
+  invalidCount: invalid.length,
+  uniqueCount: unique.length,
+  duplicateCount: duplicates.length,
+});
 
-console.log('Imported:', unique.length, 'unique users');
+console.log(report.summary);
 ```
 
 ---
@@ -158,8 +210,9 @@ If a subagent gets stuck, review:
 2. The test cases in `tests/task-X-*.test.ts` (they show expected behavior)
 3. The requirements above (they're detailed and specific)
 
-You're done when `git log` shows three commits:
+You're done when `git log` shows four commits:
 ```
+task-4: report generator with pipeline statistics
 task-3: deduplicator with case-insensitive email matching
 task-2: user validator with email and role checks
 task-1: CSV parser with quoted field support

@@ -130,6 +130,22 @@ Flags algorithms with poor complexity
 Suggests optimizations
 ```
 
+## Alternative: Claude Code on the Web
+
+Instead of self-hosting GitHub Actions, you can use **Claude Code on the web** — it runs asynchronously on Anthropic's cloud infrastructure.
+
+**How it works**:
+- Connect it to your GitHub repos
+- Trigger from PRs, or even from your phone
+- Claude Code clones your repo, runs in an isolated VM, and submits changes as PRs
+- No GitHub Actions YAML to manage — Claude Code handles environment setup
+
+**When to use which**:
+- **GitHub Actions**: Full control, self-hosted, integrates with existing CI/CD pipelines
+- **Claude Code on the web**: Simpler setup, cloud-hosted, good for async review and analysis
+
+Both approaches can use CLAUDE.md to encode your team's standards.
+
 ## Cost Considerations
 
 ### Token Usage

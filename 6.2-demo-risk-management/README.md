@@ -226,6 +226,20 @@ Implement src/services/user-service.ts following these patterns.
 4. Customize permissions for your project
 5. Use the checklist when reviewing agent pull requests
 
+## Subagent Permission Modes
+
+When configuring custom subagents (see Chapter 5.2), the `permissionMode` field controls how they handle permissions:
+
+| Mode | Behavior | Use When |
+|------|----------|----------|
+| `default` | Standard permission prompts | Normal interactive work |
+| `acceptEdits` | Auto-accept file edits | Trusted implementation subagents |
+| `dontAsk` | Auto-deny permission prompts | Read-only research or review subagents |
+| `plan` | Read-only exploration | Plan approval before implementation |
+| `bypassPermissions` | Skip all checks | **Never use in production** |
+
+For agent teams, consider using `permissionMode: plan` for teammates to require plan approval before they start writing code. This adds an extra review checkpoint.
+
 ## Key Takeaway
 
 Autonomous agents need guardrails: sandboxing, permission boundaries, checkpoint reviews, iteration limits, and an emergency stop. With these five layers, you can safely delegate code work to AI while maintaining control and quality standards.

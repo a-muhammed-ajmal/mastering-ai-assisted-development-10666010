@@ -6,9 +6,9 @@ This is the **capstone demo**: building a complete task management application w
 
 **Architecture**:
 - React frontend + Express backend + Supabase (PostgreSQL + Auth)
-- Frontend Agent: React components, routing, state management
-- Backend Agent: Express routes, middleware, database integration
-- Testing Agent: E2E tests, API tests, component tests
+- Frontend Teammate: React components, routing, state management
+- Backend Teammate: Express routes, middleware, database integration
+- Testing Teammate: E2E tests, API tests, component tests
 
 **Coordination**: Agents use shared types as the contract between frontend and backend.
 
@@ -28,22 +28,22 @@ This is the **capstone demo**: building a complete task management application w
 - **Auth**: Supabase Auth
 - **Testing**: Jest, React Testing Library, Cypress (E2E)
 
-## Agent Coordination Strategy
+## Agent Team Coordination Strategy
 
-### Key: API-First Design
+### Key: API-First Design with Plan Approval
 
-**Backend Agent defines the API first**, then Frontend Agent builds UI against it.
+**Backend teammate defines the API first**, then Frontend teammate builds UI against it.
 
-This prevents the "frontend waiting for backend" problem.
+Ask the team lead to require **plan approval** before teammates start implementing. Each teammate submits its implementation plan, the lead reviews and approves, then work begins. This prevents wasted effort on misaligned approaches.
 
 ```
-Phase 1: Backend Agent defines API spec (endpoints, types, errors)
+Phase 1: Lead creates team, assigns roles, requires plan approval
    ↓
-Phase 2: Frontend Agent starts building UI (using mock API)
+Phase 2: Backend teammate submits plan → Lead approves → Backend builds API
    ↓
-Phase 3: Frontend Agent wires up to real API
+Phase 3: Frontend teammate builds UI (using mock API, then wires to real)
    ↓
-Phase 4: Testing Agent writes E2E tests (exercises both layers)
+Phase 4: Testing teammate writes E2E tests (exercises both layers, starts last)
 ```
 
 ### Shared Types as Contract
@@ -74,7 +74,7 @@ Frontend knows exactly what the API returns. Backend knows exactly what to retur
 
 ## The Three Agent Roles
 
-### Backend Agent
+### Backend Teammate
 **Responsibility**: API endpoints, middleware, database layer
 
 **Tasks**:
@@ -102,7 +102,7 @@ router.post('/projects/:id/tasks', async (req, res) => {
 });
 ```
 
-### Frontend Agent
+### Frontend Teammate
 **Responsibility**: React components, routing, state management
 
 **Tasks**:
@@ -141,7 +141,7 @@ export const ProjectTasks: React.FC<{ projectId: string }> = ({ projectId }) => 
 };
 ```
 
-### Testing Agent
+### Testing Teammate
 **Responsibility**: E2E tests, integration tests, test infrastructure
 
 **Tasks**:
@@ -178,32 +178,32 @@ describe('Project Workflow', () => {
 
 ### Week 1, Day 1: Planning
 - **Team Lead**: Create spec, define shared types, create TASKS.md
-- **All Agents**: Review architecture and conventions
+- **All Teammates**: Review architecture and conventions
 
 ### Week 1, Days 2-3: Backend Development
-- **Backend Agent**: Define API spec, implement routes, write API tests
-- **Frontend Agent**: Start building UI components (mocked API)
-- **Testing Agent**: Create test infrastructure, fixtures, test utilities
+- **Backend Teammate**: Define API spec, implement routes, write API tests
+- **Frontend Teammate**: Start building UI components (mocked API)
+- **Testing Teammate**: Create test infrastructure, fixtures, test utilities
 
 ### Week 1, Days 4-5: Integration
-- **Frontend Agent**: Wire real API calls, test against backend
-- **Testing Agent**: Write E2E tests, resolve any issues
-- **Backend Agent**: Fine-tune API, handle edge cases
+- **Frontend Teammate**: Wire real API calls, test against backend
+- **Testing Teammate**: Write E2E tests, resolve any issues
+- **Backend Teammate**: Fine-tune API, handle edge cases
 
 ### Week 1, Day 6: Final Polish
 - **Team Lead**: Code review, merge, deploy to staging
-- **All Agents**: Final testing, documentation
+- **All Teammates**: Final testing, documentation
 
 ## Handling Blockers
 
-**Scenario**: Frontend Agent needs to fetch tasks, but Backend Agent hasn't finished the endpoint.
+**Scenario**: Frontend Teammate needs to fetch tasks, but Backend Teammate hasn't finished the endpoint.
 
 **Solution**:
-1. Backend Agent creates a mock response in `src/shared/types.ts`
-2. Frontend Agent creates a mock fetch function
-3. Frontend Agent builds UI against the mock
-4. Backend Agent finishes the real endpoint
-5. Frontend Agent switches from mock to real API
+1. Backend Teammate creates a mock response in `src/shared/types.ts`
+2. Frontend Teammate creates a mock fetch function
+3. Frontend Teammate builds UI against the mock
+4. Backend Teammate finishes the real endpoint
+5. Frontend Teammate switches from mock to real API
 
 ```typescript
 // src/api/tasks.ts (Frontend uses this)
@@ -237,9 +237,9 @@ export const fetchTasks = async (projectId: string): Promise<Task[]> => {
 1. Review `specs/task-app.md` for full specification
 2. Review `src/shared/types.ts` to understand the data contract
 3. Imagine three agents working on this:
-   - Backend Agent implements Express API
-   - Frontend Agent builds React UI
-   - Testing Agent writes comprehensive tests
+   - Backend Teammate implements Express API
+   - Frontend Teammate builds React UI
+   - Testing Teammate writes comprehensive tests
 4. Study the sample code in each layer
 5. Give Claude the team prompt to see agents coordinate
 

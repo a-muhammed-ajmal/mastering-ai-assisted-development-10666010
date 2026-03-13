@@ -1,18 +1,18 @@
-# Chapter 4.4: Full-Stack Agent Teams
+# Chapter 5.4: Full-Stack Agent Teams
 
 ## Starting Point
 
-This is a clean starting point for the fullstack agent team demo. You have shared types and specs, but no implementations yet.
+This is a clean starting point for the fullstack agent team demo. You have shared types and specs, but no implementations yet. Enable agent teams with `export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`.
 
 ## Your Task
 
-Build a complete full-stack application by assigning work to three independent agent teams:
+Build a complete full-stack application by creating an agent team with three teammates:
 
-- **API Agent** — Express backend with routes, middleware, and database
-- **Frontend Agent** — React frontend with components and hooks
-- **Testing Agent** — Comprehensive API and frontend tests
+- **Backend Teammate** — Express backend with routes, middleware, and database
+- **Frontend Teammate** — React frontend with components and hooks
+- **Testing Teammate** — Comprehensive API and frontend tests
 
-All agents share a single `src/shared/types.ts` file that defines the contract between API and frontend.
+All teammates share a single `src/shared/types.ts` file that defines the contract between API and frontend. Ask the team lead to require **plan approval** before teammates start implementing.
 
 ## The Agent Team Pattern
 
@@ -69,7 +69,7 @@ Implement the API backend according to specs/task-app.md.
 - Run: npm test — all tests must pass
 ```
 
-### Frontend Agent
+### Frontend Teammate
 
 Build the React frontend:
 
@@ -107,7 +107,7 @@ Implement the React frontend according to specs/task-app.md.
 - Run: npm test — all tests must pass
 ```
 
-### Testing Agent
+### Testing Teammate
 
 Write comprehensive tests:
 
@@ -237,7 +237,7 @@ export interface Task {
 ## Tips for Agents
 
 - **API Agent**: Start with `db/mock.ts`, then routes
-- **Frontend Agent**: Use MOCK_PROJECTS/MOCK_TASKS for development
-- **Testing Agent**: Write tests as you go; don't wait for all implementation
+- **Frontend Teammate**: Use MOCK_PROJECTS/MOCK_TASKS for development
+- **Testing Teammate**: Write tests as you go; don't wait for all implementation
 
 All three agents work in parallel - they're not blocked by each other!

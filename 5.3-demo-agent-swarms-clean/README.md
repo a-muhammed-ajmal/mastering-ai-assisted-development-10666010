@@ -1,159 +1,72 @@
-# Chapter 4.3: Agent Swarms — Parallel Component Development
+# Chapter 5.3: Agent Teams — Parallel Component Development
 
 ## Starting Point
 
-This is a clean starting point for the agent swarms demo. You have package configuration and task definitions, but no implementations yet.
+This is a clean starting point for the agent teams demo. You have package configuration and task definitions, but no implementations yet.
+
+## Prerequisites
+
+Enable agent teams (experimental feature):
+```bash
+export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
+```
 
 ## Your Task
 
-Build a complete React component library by assigning work to three parallel agents:
+Build a complete React component library by creating an agent team with three teammates:
 
-- **Agent A** — Button, Input, Select components
-- **Agent B** — Modal, Toast, Dropdown components
-- **Agent C** — Tests for all components
+1. **Teammate A: Form Components** — Button, Input, Select
+2. **Teammate B: Dialog Components** — Modal, Toast, Dropdown
+3. **Teammate C: Tests** — Unit tests for all components
 
-## The Agent Swarms Pattern
+## How to Start
 
-All three agents work **in parallel** on their assignments:
-
-### Agent A: Form Components
-Implement:
-- `src/components/Button.tsx` — Button with variants (primary, secondary, danger)
-- `src/components/Input.tsx` — Text input with label, error state, disabled state
-- `src/components/Select.tsx` — Dropdown select with options
-
-Requirements:
-- TypeScript with exported Props interfaces
-- Functional components with named exports
-- Inline styles (Tailwind classes) — no CSS files
-- Props: label, placeholder, value, onChange, disabled, error, etc.
-
-Command:
+Ask Claude:
 ```
-Implement three form components:
-1. Button — with variant='primary'|'secondary'|'danger', disabled, onClick
-2. Input — with label, type, value, onChange, error, disabled, required
-3. Select — with options, value, onChange, error, disabled, required
+Create an agent team to build this component library.
+Spawn three teammates:
+- Teammate A owns Button, Input, Select in src/components/
+- Teammate B owns Modal, Toast, Dropdown in src/components/
+- Teammate C writes tests for all components in tests/
 
-All must pass tests. Each ~50-60 lines.
+Use TypeScript, functional components, named exports, Tailwind CSS.
+Each component gets its own file: src/components/ComponentName.tsx
+Each test file mirrors: tests/ComponentName.test.tsx
 ```
 
-### Agent B: Layout Components
-Implement:
-- `src/components/Modal.tsx` — Dialog with overlay, title, footer
-- `src/components/Toast.tsx` — Auto-dismiss notification (success, error, warning, info)
-- `src/components/Dropdown.tsx` — Menu with trigger button and items
+## Conventions (All Teammates Follow)
 
-Requirements:
-- TypeScript with exported Props interfaces
-- Functional components with named exports
-- Inline styles (Tailwind classes)
-- Props: isOpen/visible, onClose, message, type, items, onSelect, etc.
+- TypeScript with strict mode
+- Functional components with hooks
+- Named exports (not default)
+- Props interfaces named `${ComponentName}Props`
+- Tailwind CSS for styling
+- Components in `src/components/`
+- Tests in `tests/`
 
-Command:
-```
-Implement three layout components:
-1. Modal — with isOpen, onClose, title, footer, closeOnOverlayClick
-2. Toast — with message, type='success'|'error'|'warning'|'info', duration, auto-dismiss
-3. Dropdown — with trigger, items, onSelect, openOnClick, closeOnClick
+## Navigation
 
-All must pass tests. Each ~60-70 lines.
-```
-
-### Agent C: Comprehensive Tests
-Write tests in `tests/`:
-- `Button.test.tsx` — Already exists (reference)
-- `Input.test.tsx` — Input component tests
-- `Select.test.tsx` — Select component tests
-- `Modal.test.tsx` — Modal component tests
-- `Toast.test.tsx` — Toast component tests (including auto-dismiss)
-- `Dropdown.test.tsx` — Dropdown component tests (menu open/close, selection)
-
-Requirements:
-- Use @testing-library/react
-- Cover: rendering, user interactions, state changes, error states, edge cases
-- All tests must pass
-- Aim for 80%+ code coverage
-
-Command:
-```
-Write comprehensive tests for all components.
-Cover:
-- Happy path rendering
-- User interactions (click, change, etc.)
-- Error states and validation
-- Edge cases
-- Props variations
-
-Run: npm test — all must pass
-```
-
-## The Shared Contract
-
-All three agents share:
-- `src/index.ts` — Barrel export (list all components)
-- `src/components/` — Component directory
-- `tests/` — Test directory
-- `package.json` — Dependencies and scripts
-- `tsconfig.json` — TypeScript configuration
-
-## Success Criteria
-
-After all agents finish:
-- [ ] 6 components implemented (Button, Input, Select, Modal, Toast, Dropdown)
-- [ ] Each component has exported Props interface
-- [ ] Each component is a functional component with named export
-- [ ] 50+ tests written (all passing)
-- [ ] No lint or TypeScript errors
-- [ ] All components exported from `src/index.ts`
-- [ ] Agents worked in parallel and coordinated via shared files
+- **Shift+Down** cycles between teammates in the terminal
+- Each teammate works independently with its own context
 
 ## Quick Start
 
 ```bash
 npm install
-npm test  # Should show failures until components are implemented
-npm run test:watch  # Watch mode for TDD
-npm run build  # TypeScript compilation
+npm test  # Should fail until components are implemented
 ```
 
-## Component Structure Example
+## Success Criteria
 
-```typescript
-// src/components/Button.tsx
-export interface ButtonProps {
-  children: React.ReactNode;
-  variant?: 'primary' | 'secondary' | 'danger';
-  disabled?: boolean;
-  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  className?: string;
-}
+- 6 components implemented with proper TypeScript types
+- 50+ tests passing across all components
+- Clean build: `npm run build` succeeds
+- All teammates complete their assigned tasks
 
-export const Button: React.FC<ButtonProps> = ({
-  children,
-  variant = 'primary',
-  disabled = false,
-  onClick,
-  className = '',
-}) => {
-  // Implementation here (~50 lines)
-};
-```
+## Key Points
 
-## Key Patterns
-
-1. **Parallel Development** — All three agents work simultaneously
-2. **Shared Files** — Agents coordinate via package.json, tsconfig.json, shared index.ts
-3. **Pull Model** — Each agent pulls requirements from TASKS.md
-4. **Integration** — Tests automatically validate all components when imported
-5. **No Blocking** — Agents are independent, can work in any order
-
-## Tips for Agents
-
-- Start with Button (simplest, no external state management)
-- Input and Select follow similar patterns
-- Modal/Toast/Dropdown use React hooks (useState, useEffect, useRef)
-- Tests use @testing-library/react (fireEvent, render, screen)
-- Use Tailwind classes for styling (no CSS files)
-- Each component file should be ~50-70 lines (including JSDoc)
-- Tests should be comprehensive but concise (~40-50 lines per component)
+- Agent teams work **truly in parallel** — not sequentially like subagents
+- Teammates communicate via **shared task list** and **messaging**
+- The **team lead** coordinates and resolves blockers
+- Each teammate owns specific files — no overlapping
+- Shared types file provides the contract between components

@@ -8,6 +8,7 @@
     "test:task1": "jest --testPathPattern=task-1",
     "test:task2": "jest --testPathPattern=task-2",
     "test:task3": "jest --testPathPattern=task-3",
+    "test:task4": "jest --testPathPattern=task-4",
     "build": "tsc"
   },
   "devDependencies": {
