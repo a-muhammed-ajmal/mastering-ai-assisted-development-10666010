@@ -1,4 +1,4 @@
-# Chapter 5.1: CI/CD Workflows - Automated Testing and Quality Checks
+# Chapter 6.1: CI/CD Workflows - Automated Testing and Quality Checks
 
 ## Starting Point
 

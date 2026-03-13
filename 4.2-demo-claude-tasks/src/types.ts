@@ -1,8 +1,8 @@
 /**
  * Shared type definitions for the Claude Tasks demo.
  *
- * All three tasks use these types to ensure consistent data flow.
- * These types form the contract between subagents — each task
+ * All four tasks use these types to ensure consistent data flow.
+ * These types form the contract between tasks — each task
  * consumes and produces data matching these interfaces.
  */
 
@@ -23,4 +23,14 @@ export interface ValidationResult {
 export interface DeduplicationResult {
   unique: User[];
   duplicates: User[];
+}
+
+export interface ImportReport {
+  totalParsed: number;
+  validCount: number;
+  invalidCount: number;
+  uniqueCount: number;
+  duplicateCount: number;
+  summary: string;
+  generatedAt: string;
 }

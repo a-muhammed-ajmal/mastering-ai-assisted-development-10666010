@@ -190,6 +190,24 @@ Track metrics before and after AI adoption:
 - **Before**: 3.2/5 ("tedious boilerplate")
 - **After**: 4.1/5 ("can focus on interesting problems")
 
+## Shared Subagent Library
+
+Beyond skills, maintain a library of custom subagents in `.claude/agents/`:
+
+```
+.claude/agents/
+  code-reviewer.md    — Reviews code for quality and your team's standards
+  test-writer.md      — Writes tests following your testing conventions
+  security-auditor.md — Checks code against your compliance requirements
+  api-designer.md     — Designs API endpoints following team patterns
+```
+
+Each subagent has YAML frontmatter with tool restrictions and model selection, plus a focused system prompt encoding your team's expertise.
+
+**Distributing via plugins**: Package subagents into a plugin so any project can install them with one command. When someone improves a subagent's prompt, every project gets the update on the next plugin refresh.
+
+Check subagent configs into version control. When a team member discovers a better prompt for code review, the whole team benefits.
+
 ## Files in This Demo
 
 - `README.md` (this file)
@@ -199,6 +217,7 @@ Track metrics before and after AI adoption:
   - `database-migration.md` — Write DB migrations
   - `react-component.md` — Build React components
   - `unit-test.md` — Write tests
+- `.claude/agents/` — Shared subagent configurations (see examples)
 - `governance/` — Cost tracking and audit templates
 
 ## Getting Started
@@ -206,9 +225,10 @@ Track metrics before and after AI adoption:
 1. Copy `templates/CLAUDE.md.template` to your project as `CLAUDE.md`
 2. Customize for your project
 3. Create `skills/` directory with your team's standard prompts
-4. Establish code review process using risk management checklist
-5. Measure impact (velocity, defects, review time)
-6. Refine skills and CLAUDE.md based on team feedback
+4. Create `.claude/agents/` with your team's shared subagents
+5. Establish code review process using risk management checklist
+6. Measure impact (velocity, defects, review time)
+7. Refine skills, subagents, and CLAUDE.md based on team feedback
 
 ## Team Lead Responsibilities
 

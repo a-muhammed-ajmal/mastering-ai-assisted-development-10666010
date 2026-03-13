@@ -1,12 +1,12 @@
-# Claude Tasks — Native Modular Agent Chains
+# Task Specs & the Hydration Pattern
 
 ## Overview
 
-**Claude Tasks** use Claude Code's built-in Task tool to break a complex job into independent subtasks, each executed by its own subagent. Every subagent gets a fresh context window, works autonomously, and returns a summary when done. If one task fails, the others are unaffected.
+**Task specs** are structured markdown files that define multi-step work with dependencies and acceptance criteria. Claude reads the spec, works through tasks in dependency order, and checks them off as it goes. The spec file lives in git, so progress persists across sessions.
 
-This is not a custom pattern you have to invent — it is how Claude Code already works. The Task tool spawns subagents that can read files, run commands, edit code, and verify results, all without bloating the parent conversation's context.
+This is the **hydration pattern**: at session start, Claude reads the spec and picks up where you left off. Session state is ephemeral, but the spec file is permanent.
 
-## Why Tasks Over Monolithic Prompts
+## Why Task Specs Over Monolithic Prompts
 
 ### Monolithic Approach (fragile)
 ```
@@ -21,197 +21,118 @@ This is not a custom pattern you have to invent — it is how Claude Code alread
 Problems:
 - Agent gets lost in complexity
 - Hard to know which step failed
-- Context window fills up fast
-- Can't parallelize anything
+- No dependency tracking
+- Can't resume across sessions
 
-### Claude Tasks Approach (resilient)
-```
-Task 1: CSV parser (string → User[])
-Task 2: Validator (User[] → { valid, invalid })
-Task 3: Deduplicator (User[] → { unique, duplicates })
+### Task Spec Approach (structured)
+```markdown
+- [ ] T1: CSV parser (string -> User[])
+- [ ] T2: Validator (User[] -> { valid, invalid }) — blocked by T1
+- [ ] T3: Deduplicator (User[] -> { unique, duplicates }) — blocked by T2
+- [ ] T4: Report Generator (stats -> ImportReport) — (no dependencies)
 ```
 
 Benefits:
-- Each task gets its own fresh context — no bloat
-- Tasks run independently and return summaries
-- A failing task doesn't corrupt others
-- Tasks can run in parallel when there are no dependencies
-- Atomic commits after each task passes its tests
+- Claude reads the spec and works through tasks in dependency order
+- Each completed task gets checked off in the spec
+- Commit the spec to git — next session resumes from where you left off
+- Acceptance criteria let Claude self-verify before moving on
+- Auditable record of what was done and when
 
-## How Claude Tasks Work
+## How It Works
 
-When you give Claude Code a complex job, it can use the **Task tool** to spawn subagents:
+### Step 1: Write the Task Spec
+
+Create a `tasks-spec.md` file with:
+- Tasks as unchecked boxes (`- [ ]`)
+- Dependency annotations (`blocked by T1`)
+- Acceptance criteria for each task (test commands, expected outputs)
+
+### Step 2: Ask Claude to Execute
 
 ```
-Parent agent (orchestrator):
-  → Task 1: "Implement the CSV parser in src/csv-parser.ts. Run npm run test:task1."
-  → Task 2: "Implement the validator in src/validator.ts. Run npm run test:task2."
-  → Task 3: "Implement the deduplicator in src/deduplicator.ts. Run npm run test:task3."
+Read tasks-spec.md and implement all unchecked tasks in order,
+running tests after each one. Check off completed tasks in the spec.
 ```
 
-Each subagent:
-1. Gets its own context window (fresh, focused)
-2. Has access to all the same tools (Read, Edit, Bash, etc.)
-3. Works autonomously until done
-4. Returns a summary to the parent
+Claude will:
+1. Read the spec and identify unblocked tasks
+2. Implement the first unblocked task
+3. Run tests to verify (self-check against acceptance criteria)
+4. Check off the completed task in the spec
+5. Move to the next unblocked task
+6. Repeat until all tasks are complete
 
-The parent agent orchestrates: it decides order, handles dependencies, and commits after each task passes.
-
-## The Workflow: Implement → Test → Commit
-
-For each task:
-
-1. **Delegate** — Parent spawns a subagent with a focused prompt
-2. **Implement** — Subagent writes the code
-3. **Test** — Subagent runs the task's test suite
-4. **Report** — Subagent returns pass/fail summary
-5. **Commit** — Parent commits the working code
-
-Example workflow:
+### Step 3: Commit and Resume
 
 ```bash
-# Task 1: CSV Parser
-npm run test:task1  # Fails (stub)
-# Claude subagent implements src/csv-parser.ts
-npm run test:task1  # Passes
-git commit -m "task-1: CSV parser with quoted field handling"
-
-# Task 2: Validator
-npm run test:task2  # Fails (stub)
-# Claude subagent implements src/validator.ts
-npm run test:task2  # Passes
-git commit -m "task-2: user validator with email regex"
-
-# Task 3: Deduplicator
-npm run test:task3  # Fails (stub)
-# Claude subagent implements src/deduplicator.ts
-npm run test:task3  # Passes
-git commit -m "task-3: deduplicator (case-insensitive email matching)"
+git add src/tasks-spec.md
+git commit -m "progress: tasks 1-3 complete"
 ```
+
+Next session, Claude reads the spec, sees checked items, and only works on what's left.
 
 ## Worked Example: User Import Pipeline
 
-### The Tasks
+### The Task Spec
+
+See `src/tasks-spec.md` for the full specification. Four tasks:
 
 **Task 1: CSV Parser**
-- Input: Raw CSV string (`"name,email,role\nAlice,alice@example.com,admin\n..."`)
-- Output: Array of user objects (`[{ name: 'Alice', email: '...', role: 'admin' }, ...]`)
+- Input: Raw CSV string
+- Output: Array of user objects
 - Handles: quoted fields, empty rows, whitespace trimming
-- Tests: `npm run test:task1` (7 test cases)
-- Commit: `git commit -m "task-1: CSV parser"`
+- Acceptance: `npm run test:task1` passes all 7 tests
 
-**Task 2: Validator**
+**Task 2: Validator** (blocked by T1)
 - Input: Array of parsed users
 - Output: `{ valid: User[], invalid: { user, errors }[] }`
-- Rules:
-  - Email must match standard regex
-  - Role must be one of: 'admin', 'editor', 'viewer'
-  - Name must be non-empty
-- Tests: `npm run test:task2` (7 test cases)
-- Commit: `git commit -m "task-2: user validator"`
+- Rules: email format, role enum, non-empty name
+- Acceptance: `npm run test:task2` passes all 7 tests
 
-**Task 3: Deduplicator**
+**Task 3: Deduplicator** (blocked by T2)
 - Input: Array of valid users
 - Output: `{ unique: User[], duplicates: User[] }`
-- Logic: Duplicate = same email (case-insensitive), keep LAST occurrence
-- Tests: `npm run test:task3` (7 test cases)
-- Commit: `git commit -m "task-3: deduplicator"`
+- Logic: same email (case-insensitive), keep last occurrence
+- Acceptance: `npm run test:task3` passes all 7 tests
 
-### How to Run with Claude Code
+**Task 4: Report Generator** (no dependencies)
+- Input: Pipeline statistics (counts for each stage)
+- Output: `ImportReport` with summary string and timestamp
+- Logic: calculates validation and uniqueness rates
+- Acceptance: `npm run test:task4` passes all 7 tests
+- Key insight: since T4 has no dependencies, Claude can start it alongside T1
 
-**Initial instruction:**
-```
-You are implementing a user import pipeline using Claude Tasks.
-Each task is delegated to a subagent with its own context.
+### The Hydration Pattern in Action
 
-Work through the tasks in order:
+**Session 1**: Claude reads spec, implements T1 and T2, checks them off. You commit.
 
-1. Spawn a task to implement the CSV Parser
-   - Implement src/csv-parser.ts
-   - Run: npm run test:task1
-   - When all tests pass, report success
+**Session 2**: Claude reads spec, sees T1 and T2 are checked, starts at T3. Completes it.
 
-2. Spawn a task to implement the Validator
-   - Implement src/validator.ts
-   - Run: npm run test:task2
-   - When all tests pass, report success
-
-3. Spawn a task to implement the Deduplicator
-   - Implement src/deduplicator.ts
-   - Run: npm run test:task3
-   - When all tests pass, report success
-
-Commit after each task succeeds.
-Do NOT start the next task until the current one passes all tests.
-```
-
-## Context Isolation: Why Tasks Beat Long Conversations
-
-In a single long conversation, Claude's context fills up. Early instructions get compacted away. By task 3, Claude may have forgotten the type definitions from task 1.
-
-With Tasks, each subagent starts fresh:
-- Task 1 agent only sees the CSV parser code and tests
-- Task 2 agent only sees the validator code and tests
-- Task 3 agent only sees the deduplicator code and tests
-
-No context pollution. No forgotten instructions. Each task is laser-focused.
-
-## Parallel Tasks
-
-When tasks don't depend on each other, Claude can run them simultaneously:
-
-```
-# These could run in parallel:
-Task A: "Add unit tests for the auth module"
-Task B: "Update the README with the new API docs"
-Task C: "Lint and fix all files in src/"
-
-# These must run sequentially:
-Task 1: "Parse the CSV" (output needed by Task 2)
-Task 2: "Validate the parsed data" (output needed by Task 3)
-Task 3: "Deduplicate the valid data"
-```
-
-Our pipeline is sequential (each task uses the previous task's output types), but Claude Code supports parallel execution when the dependency graph allows it.
-
-## Failure Recovery
-
-If Task 3 fails:
-
-```bash
-git log
-# task-3: deduplicator (failing, not yet committed)
-# task-2: user validator (committed)
-# task-1: CSV parser (committed)
-
-# Tasks 1 and 2 are safely committed
-# Retry Task 3, or fix and re-run
-```
-
-The parent agent can retry a failed task with additional context, or you can intervene and steer.
+No context from Session 1 is needed — the spec file IS the context.
 
 ## Files in This Demo
 
-- `src/tasks-spec.md` — Specification for all three tasks
+- `src/tasks-spec.md` — The task specification with dependencies and acceptance criteria
 - `src/types.ts` — Shared type definitions (the contract between tasks)
 - `src/csv-parser.ts` — Task 1 implementation (stub)
 - `src/validator.ts` — Task 2 implementation (stub)
 - `src/deduplicator.ts` — Task 3 implementation (stub)
+- `src/reporter.ts` — Task 4 implementation (stub, no dependencies)
 - `tests/task-1-parser.test.ts` — Task 1 tests
 - `tests/task-2-validator.test.ts` — Task 2 tests
 - `tests/task-3-dedup.test.ts` — Task 3 tests
-- `package.json`, `tsconfig.json` — Build configuration
+- `tests/task-4-reporter.test.ts` — Task 4 tests
 
 ## Getting Started
 
-1. Copy this directory as a starting point
-2. Define your tasks in a spec file
-3. Create shared types in `src/types.ts` (the contract between tasks)
-4. Create stubs with `// TODO` comments for each task
-5. Write comprehensive tests for each task
-6. Give Claude the task-based prompt (see above)
-7. Watch each task get delegated, implemented, and committed
+1. Review `src/tasks-spec.md` to understand the task structure
+2. Review `src/types.ts` for the shared data contract
+3. Run `npm install`
+4. Ask Claude: "Read tasks-spec.md and implement all unchecked tasks in order, running tests after each one."
+5. Watch Claude work through the dependency chain
+6. Commit the updated spec file to preserve progress
 
 ## Key Takeaway
 
-Claude Tasks are the native way to decompose complex work in Claude Code. Each subagent gets fresh context, works independently, and reports back. The parent orchestrates. You get atomic commits, context isolation, and the option to parallelize — all built into the tool, no custom patterns required.
+Task specs give you structured single-agent work with cross-session persistence. The hydration pattern — persistent spec + ephemeral session — means your project state lives in git, not in Claude's context window. Notice how T4 (Report Generator) has no dependencies — Claude identifies it as unblocked and can start it immediately alongside T1, showing how dependency annotations control execution order even for independent tasks. For multi-agent parallel work, see Chapter 5 (Subagents and Agent Teams).
