@@ -101,9 +101,9 @@ Here's a survey of real-world tools that let you orchestrate agents today:
 
 In the next three sections, you'll **learn to orchestrate agents yourself**. You'll move from watching agents work independently to actively designing orchestration patterns:
 
-- **4.2: Demo Subagents** — A parent agent spawns and coordinates focused child agents, each with a specialized role (one handles tests, one handles docs, etc.)
-- **4.3: Demo Agent Swarms** — Multiple agents work in parallel on different tasks, with lightweight coordination via shared goals and status updates
-- **4.4: Fullstack Agent Team** — Capstone project. Build a complete application (frontend, backend, database, deployment) with a coordinated team of agents
+- **5.2: Subagents** — A parent agent spawns and coordinates focused child agents, each with a specialized role (one handles tests, one handles docs, etc.)
+- **5.3: Agent Swarms** — Multiple agents work in parallel on different tasks, with lightweight coordination via shared goals and status updates
+- **5.4: Fullstack Agent Team** — Capstone project. Build a complete application (frontend, backend, database, deployment) with a coordinated team of agents
 
 By the end, you'll understand not just *how* to orchestrate, but *why* it's the future of AI-assisted development.
 

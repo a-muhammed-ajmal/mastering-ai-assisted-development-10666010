@@ -48,7 +48,7 @@ Building on the foundations from *AI-Native Engineering Foundations*, this cours
 | Video | Title | Demo | Description |
 |-------|-------|------|-------------|
 | 4.1 | The RALPH Loop — Self-Improving Agents | `4.1-demo-ralph-loop` | Implement the RALPH pattern: agents that pick a task, implement, validate, commit, and loop — building compound knowledge with each iteration via AGENTS.md. |
-| 4.2 | The Beads Pattern — Modular Agent Chains | `4.2-demo-beads-pattern` | Break complex pipelines into atomic "beads" — each one implemented, tested, and committed independently. Failure in one bead doesn't destroy earlier work. |
+| 4.2 | Tasks — Dependency Tracking & Cross-Session Persistence | `4.2-demo-claude-tasks` | Use Claude Code's native task system to break specs into tracked, dependency-aware tasks that persist across sessions and coordinate between agents. |
 | 4.3 | Multi-Phase Planning for Large Refactors | `4.3-demo-multi-phase-planning` | Tackle large-scale changes by breaking them into phases with checkpoints: plan → scaffold → implement → test → integrate. Real example: migrating an Express API to a new architecture. |
 
 ### Chapter 5: The Orchestrator Paradigm
@@ -62,44 +62,19 @@ Building on the foundations from *AI-Native Engineering Foundations*, this cours
 | 5.4 | Fullstack App with Agent Teams | `5.4-demo-fullstack-agent-team` | Build a complete task management app (React + Express + Auth) using coordinated agents: one for the API, one for the frontend, one for tests. |
 
 ### Chapter 6: Production Workflows
-*Take AI-assisted development from prototype to production: CI/CD integration, risk management, and team scaling.*
+*Take AI-assisted development from prototype to production: generative media, testing, and building your personal playbook.*
 
 | Video | Title | Demo | Description |
 |-------|-------|------|-------------|
-| 6.1 | AI-Powered CI/CD Pipelines | `6.1-demo-cicd-workflows` | GitHub Actions workflows that use AI for automated code review, test coverage gap detection, and PR summarization. |
-| 6.2 | Risk Management & Human Oversight | `6.2-demo-risk-management` | Guardrails for autonomous agents: sandboxing, permission boundaries, emergency stops, and checkpoint-based review workflows. |
-| 6.3 | Scaling AI Development Across Teams | `6.3-demo-team-scaling` | Shared CLAUDE.md conventions, standardized skill libraries, MCP server catalogs, and governance patterns for engineering organizations. |
+| 6.1 | Generative Media for Your Apps | `6.1-demo-generative-media` | Integrate AI-generated images (Nano Banana), video (Veo), and audio (Advanced TTS) into your applications using Google's models in AI Studio. |
+| 6.2 | AI-Powered Testing & Debugging | `6.2-demo-testing-debugging` | Use Claude Code and DevTools MCP for test generation, TDD with AI, and automated UX testing pipelines. Turn AI from a code generator into a quality engineer. |
+| 6.3 | Your AI Development Playbook | `6.3-demo-ai-playbook` | Capstone: design your personal AI development workflow — a decision framework, reusable template library, and feedback loop for continuous improvement. |
 
-## What Changed from the Foundations Course
+## Demo Structure
 
-If you took *AI-Native Engineering Foundations*, here's what's new:
-
-- **No rehash of basics** — we assume you know prompting patterns, CLAUDE.md, and iterative refinement
-- **Advanced vibe coding up front** — Chapter 1 shows what's possible with well-crafted specs before diving into how
-- **Deep dive on Skills** — Chapter 2 walks through the Frontend Design Skill (before/after), the PPTX Skill, and teaches you to write your own
-- **Full MCP chapter** — Chapter 3 covers Context7 for live docs, Chrome DevTools MCP for browser debugging, and building custom MCP servers
-- **Three paradigms** — vibe coding → conductor (Skills + MCP + Hooks) → orchestrator (multi-agent, parallel)
-- **Autonomous patterns** — agents that loop, self-improve, and build compound knowledge
-- **True orchestration** — Chapter 5 covers the paradigm shift to multi-agent parallel development
-- **Production-ready workflows** — CI/CD, risk management, and team governance
-
-## Instructions
-This repository has branches for each of the videos in the course. You can use the branch pop up menu in github to switch to a specific branch and take a look at the course at that stage, or you can add `/tree/BRANCH_NAME` to the URL to go to the branch you want to access.
-
-## Branches
-The branches are structured to correspond to the videos in the course. The naming convention is `CHAPTER#_MOVIE#`. As an example, the branch named `02_03` corresponds to the second chapter and the third video in that chapter.
-Some branches will have a beginning and an end state. These are marked with the letters `b` for "beginning" and `e` for "end". The `b` branch contains the code as it is at the beginning of the movie. The `e` branch contains the code as it is at the end of the movie. The `main` branch holds the final state of the code when in the course.
-
-When switching from one exercise files branch to the next after making changes to the files, you may get a message like this:
-
-    error: Your local changes to the following files would be overwritten by checkout:        [files]
-    Please commit your changes or stash them before you switch branches.
-    Aborting
-
-To resolve this issue:
-
-    Add changes to git using this command: git add .
-	Commit changes using this command: git commit -m "some message"
+Each demo has two versions:
+- **`X.Y-demo-name`** — The completed project with all code, configurations, and examples
+- **`X.Y-demo-name-clean`** — A minimal starting point for hands-on practice
 
 ## Installing
 1. To use these exercise files, you must have the following installed:
@@ -115,12 +90,7 @@ Addy Osmani
 
 Engineering Leader and author focused on AI-assisted development, web performance, and developer tooling.
 
-
-
 Check out my other courses on [LinkedIn Learning](https://www.linkedin.com/learning/instructors/).
-
-
-[0]: # (Replace these placeholder URLs with actual course URLs)
 
 [lil-course-url]: https://www.linkedin.com/learning/
 [lil-thumbnail-url]: https://media.licdn.com/dms/image/v2/D4E0DAQG0eDHsyOSqTA/learning-public-crop_675_1200/B4EZVdqqdwHUAY-/0/1741033220778?e=2147483647&v=beta&t=FxUDo6FA8W8CiFROwqfZKL_mzQhYx9loYLfjN-LNjgA
